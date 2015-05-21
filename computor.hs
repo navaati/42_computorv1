@@ -51,6 +51,7 @@ equationParser = do
   lhs <- polyParser
   string " = "
   rhs <- polyParser
+  eof
   return (lhs, rhs)
 
 data ComputorError = WrongNumberOfArgument
