@@ -1,6 +1,6 @@
 {-# LANGUAGE ViewPatterns #-}
 
-import Control.Applicative
+import Control.Applicative hiding ((<|>), many)
 import Control.Monad
 import Text.Parsec
 import Text.ParserCombinators.Parsec.Number
@@ -41,10 +41,20 @@ termParser = do
   modifyState (+ 1)
   return coeff
 
+opParser :: EqParser (Double -> Double)
+opParser = do
+  char ' '
+  op <- id <$ char '+'
+        <|> negate <$ char '-'
+  char ' '
+  return op
+
 polyParser :: EqParser GeneralPoly
 polyParser = do
   putState 0
-  GP <$> termParser `sepBy1` (try $ string " + ")
+  first_term <- termParser
+  other_terms <- many (try $ opParser <*> termParser)
+  return (GP $ first_term:other_terms)
 
 equationParser :: EqParser Equation
 equationParser = do
