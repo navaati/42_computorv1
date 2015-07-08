@@ -1,7 +1,7 @@
 {-# LANGUAGE ViewPatterns #-}
 
 import Control.Applicative hiding ((<|>), many)
-import Control.Monad
+import Data.List
 import Text.Parsec
 import Text.ParserCombinators.Parsec.Number
 import Control.Monad.Except
@@ -16,10 +16,8 @@ data Poly = Poly {
   }
           deriving (Show)
 
--- In GeneralPoly the head of the list is the zeroth degree coefficient
-newtype GeneralPoly = GP [Double]
-                    deriving (Show)
-
+-- In Coefficients the head of the list is the zeroth degree coefficient
+type Coefficients = [Double]
 
 zipWithDefault :: (a -> a -> b) -> a -> [a] -> [a] -> [b]
 zipWithDefault _ _ [] [] = []
@@ -27,9 +25,7 @@ zipWithDefault op def (x:xs) [] = (x `op` def):zipWithDefault op def xs []
 zipWithDefault op def [] (y:ys) = (def `op` y):zipWithDefault op def [] ys
 zipWithDefault op def (x:xs) (y:ys) = (x `op` y):zipWithDefault op def xs ys
 
-subtract_gp (GP l1, GP l2) = GP $ zipWithDefault (-) 0 l1 l2
-
-type Equation = (GeneralPoly, GeneralPoly)
+type Equation = (Coefficients, Coefficients)
 
 type EqParser a = Parsec String Int a -- The state is the degree of the current term
 
@@ -49,12 +45,12 @@ opParser = do
   char ' '
   return op
 
-polyParser :: EqParser GeneralPoly
+polyParser :: EqParser Coefficients
 polyParser = do
   putState 0
   first_term <- termParser
   other_terms <- many (try $ opParser <*> termParser)
-  return (GP $ first_term:other_terms)
+  return (first_term:other_terms)
 
 equationParser :: EqParser Equation
 equationParser = do
@@ -77,12 +73,12 @@ readEquation [eq] = withExceptT ParseError . ExceptT . return $
                     runParser equationParser 0 "command line" eq
 readEquation  _ = throwError WrongNumberOfArgument
 
--- In ReducedPoly the head of the list is the zeroth degree coefficient and the last coefficient is guaranteed to be non-zero
-newtype ReducedPoly = RP [Double]
+-- In ReducedPoly the last coefficient is guaranteed to be non-zero
+newtype ReducedPoly = RP Coefficients
                     deriving (Show)
 
-reduce :: Equation -> ReducedPoly
-reduce (subtract_gp -> GP p) = RP $ foldr trimPolyHelper [] p
+reduce :: Coefficients -> ReducedPoly
+reduce = RP . foldr trimPolyHelper []
   where trimPolyHelper 0 [] = []
         trimPolyHelper n l = n:l
 
@@ -116,7 +112,7 @@ solve (Poly c b a) = case b^2 - 4 * a * c of -- Classical resolution of 2nd degr
 
 computor :: [String] -> ComputorM Solution
 computor args = do
-  rp <- reduce <$> readEquation args
+  rp <- reduce . (uncurry $ zipWithDefault (-) 0) <$> readEquation args
   tell [show rp]
   let deg = getDegree rp
   tell [show deg]
