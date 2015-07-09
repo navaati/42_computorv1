@@ -95,7 +95,7 @@ data Degree = MinusInf | Degree Int
 
 getDegree :: ReducedPoly -> Degree
 getDegree (RP []) = MinusInf
-getDegree (RP l) = Degree $ length l - 1
+getDegree (RP (_:l)) = Degree $ length l
 
 
 data Solution = TwoRoots Double Double | DoubleRoot Double | OneRoot Double | AllReals
