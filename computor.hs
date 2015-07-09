@@ -103,7 +103,7 @@ data Solution = TwoRoots Double Double | DoubleRoot Double | OneRoot Double | Al
 
 solve :: Poly -> ComputorM Solution
 solve (Poly 0 0 0) = return AllReals -- Equation 0 + 0X + 0X^2 = 0 <=> 0 = 0 holds for every X
-solve (Poly c 0 0) = throwError NoSolution -- Equation c + 0X + 0X^2 = 0 <=> c = 0 where c /= is always false, thus holds for no X
+solve (Poly c 0 0) = throwError NoSolution -- Equation c + 0X + 0X^2 = 0 <=> c = 0 where c /= 0 is always false, thus holds for no X
 solve (Poly c b 0) = return $ OneRoot (-c / b) -- Equation c + bX + 0X^2 = 0 <=> bX + c = 0 <=> bX = -c <=> X = -c/b, wich always exist since b in not null
 solve (Poly c b a) = case b^2 - 4 * a * c of -- Classical resolution of 2nd degree equation
                       0 -> return $ DoubleRoot (-b / (2 * a))
