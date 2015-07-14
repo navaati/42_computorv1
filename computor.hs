@@ -103,6 +103,17 @@ getDegree (RP (_:l)) = Degree $ length l
 data Solution = TwoRoots (Complex Double) (Complex Double) | DoubleRoot Double | OneRoot Double | AllReals
               deriving (Show)
 
+mySqrt :: Double -> Complex Double
+mySqrt x | x < 0 = (0 :+ myRealSqrt (-x))
+         | otherwise = myRealSqrt x :+ 0
+
+myRealSqrt :: Double -> Double
+myRealSqrt x = bin_search (\x -> x * x) 0 x
+  where bin_search :: (Double -> Double) -> Double -> Double -> Double
+        bin_search op low high | abs (high - low) < 0.0000000000001 = high
+                               | otherwise = let mid = (high + low) / 2
+                                             in if op mid > x then bin_search op low mid else bin_search op mid high
+
 solve :: Poly -> ComputorM Solution
 solve (Poly 0 0 0) = return AllReals -- Equation 0 + 0X + 0X^2 = 0 <=> 0 = 0 holds for every X
 solve (Poly c 0 0) = throwError NoSolution -- Equation c + 0X + 0X^2 = 0 <=> c = 0 where c /= 0 is always false, thus holds for no X
@@ -114,7 +125,7 @@ solve (Poly c b a) = case b^2 - 4 * a * c of -- Classical complex solution of 2n
                                ((-b' - sqrt_discr) / (2 * a'))
                         where a' = a :+ 0
                               b' = b :+ 0
-                              sqrt_discr = sqrt $ discr :+ 0
+                              sqrt_discr = mySqrt discr
 
 
 displayReducedPoly :: ReducedPoly -> String
