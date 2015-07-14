@@ -3,6 +3,7 @@
 import Control.Applicative hiding ((<|>), many)
 import Data.Complex
 import Data.List
+import Data.Maybe
 import Text.Parsec
 import Text.ParserCombinators.Parsec.Number
 import Control.Monad.Except
@@ -108,11 +109,11 @@ mySqrt x | x < 0 = (0 :+ myRealSqrt (-x))
          | otherwise = myRealSqrt x :+ 0
 
 myRealSqrt :: Double -> Double
-myRealSqrt x = bin_search (\x -> x * x) 0 x
-  where bin_search :: (Double -> Double) -> Double -> Double -> Double
-        bin_search op low high | abs (high - low) < 0.0000000000001 = high
-                               | otherwise = let mid = (high + low) / 2
-                                             in if op mid > x then bin_search op low mid else bin_search op mid high
+myRealSqrt a = fst . fromJust $ find (\(x_k, x_kp1) -> absError x_kp1 >= absError x_k) $ zip newtonSerie (tail newtonSerie)
+  where absError x = abs (x * x - a)
+        newtonSerie = iterate newtonNext seed
+        newtonNext x_k = (x_k + a / x_k) / 2
+        seed = a -- This could be better, for example by finding the nearest integer
 
 solve :: Poly -> ComputorM Solution
 solve (Poly 0 0 0) = return AllReals -- Equation 0 + 0X + 0X^2 = 0 <=> 0 = 0 holds for every X
