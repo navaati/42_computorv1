@@ -19,4 +19,10 @@ executable computor
   main-is:             computor-cli.hs
   build-depends:       computorv1, base, mtl
   default-language:    Haskell2010
+
+test-suite computorv1-testsuite
+  hs-source-dirs:      tests
+  type:                exitcode-stdio-1.0
+  main-is:             Main.hs
+  build-depends:       QuickCheck, test-framework, test-framework-quickcheck2, computorv1, base
   default-language:    Haskell2010
