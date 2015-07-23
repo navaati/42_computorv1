@@ -16,7 +16,7 @@ type Equation = (Coefficients, Coefficients)
 
 -- In ReducedPoly the last coefficient is guaranteed to be non-zero
 newtype ReducedPoly = RP Coefficients
-                    deriving (Show)
+                    deriving (Show, Eq)
 
 reduce :: Coefficients -> ReducedPoly
 reduce = RP . foldr trimPolyHelper []
@@ -28,7 +28,7 @@ data Poly = Poly {
   firstDegree :: Double,
   secondDegree :: Double
   }
-          deriving (Show)
+          deriving (Show, Eq)
 
 reducedToPoly :: MonadError ComputorError m => ReducedPoly -> m Poly
 reducedToPoly (RP [z, o, t]) = return $ Poly z o t
@@ -38,7 +38,7 @@ reducedToPoly (RP []) = return $ Poly 0 0 0
 reducedToPoly _ = throwError DegreeMoreThan2
 
 data Degree = MinusInf | Degree Int
-            deriving (Show)
+            deriving (Show, Eq)
 
 getDegree :: ReducedPoly -> Degree
 getDegree (RP []) = MinusInf
@@ -57,7 +57,7 @@ mySqrt x | x < 0 = (0 :+ myRealSqrt (-x))
          | otherwise = myRealSqrt x :+ 0
 
 data Solution = TwoRoots (Complex Double) (Complex Double) | DoubleRoot Double | OneRoot Double | AllReals
-              deriving (Show)
+              deriving (Show, Eq)
 
 solve :: MonadError ComputorError m => Poly -> m Solution
 solve (Poly 0 0 0) = return AllReals -- Equation 0 + 0X + 0X^2 = 0 <=> 0 = 0 holds for every X

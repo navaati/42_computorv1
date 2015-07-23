@@ -8,4 +8,4 @@ data ComputorError = WrongNumberOfArgument
                    | ParseError ParseError
                    | DegreeMoreThan2
                    | NoSolution
-                   deriving (Show)
+                   deriving (Show, Eq)
