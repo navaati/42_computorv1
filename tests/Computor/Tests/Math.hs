@@ -2,8 +2,10 @@ module Computor.Tests.Math where
 
 import Test.QuickCheck
 import Data.Complex
+import Control.Monad
 
 import Computor.Math
+import Computor.Error
 
 prop_real_sqrt_prec :: Double -> Property
 prop_real_sqrt_prec x = x > 0 ==> (myRealSqrt x)^2 - x < 0.00000000001
@@ -22,3 +24,27 @@ prop_sqared_complex_sqrt_signum (NonZero x) = signum x === (realPart $ signum $ 
 
 prop_complex_sqrt_either_real_or_imag :: NonZero Double -> Bool
 prop_complex_sqrt_either_real_or_imag (NonZero x) = isReal (mySqrt x) /= isImag (mySqrt x)
+
+prop_reduce_last_coeff_is_not_null :: NonEmptyList Double -> Bool
+prop_reduce_last_coeff_is_not_null (NonEmpty cs) = let RP l = reduce cs in last l /= 0
+
+prop_reduce_idem :: Coefficients -> Property
+prop_reduce_idem cs = reduce cs === (reduce . unRP . reduce) cs
+  where unRP (RP rp) = rp
+
+prop_reduce_reducedPoly :: Coefficients -> Property
+prop_reduce_reducedPoly cs = not (null rp) ==> last rp /= 0
+  where (RP rp) = reduce cs
+
+instance Arbitrary ReducedPoly where
+  arbitrary = RP <$> liftM2 replaceLast (getNonZero <$> arbitrary) arbitrary
+    where replaceLast :: a -> [a] -> [a]
+          replaceLast _ [] = []
+          replaceLast x [_] = [x]
+          replaceLast x (a:as) = a:replaceLast x as
+
+prop_arbitrary_reducedPoly :: ReducedPoly -> Property
+prop_arbitrary_reducedPoly (RP cs) = not (null cs) ==> last cs /= 0
+
+prop_reducedToPoly_degree_error :: ReducedPoly -> Property
+prop_reducedToPoly_degree_error rp@(RP cs) = length cs > 3 ==> reducedToPoly rp === Left DegreeMoreThan2
