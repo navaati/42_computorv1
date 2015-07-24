@@ -28,16 +28,31 @@ prop_complex_sqrt_either_real_or_imag (NonZero x) = isReal (mySqrt x) /= isImag 
 prop_reduce_last_coeff_is_not_null :: NonEmptyList Double -> Bool
 prop_reduce_last_coeff_is_not_null (NonEmpty cs) = let RP l = reduce cs in last l /= 0
 
-prop_reduce_idem :: Coefficients -> Property
-prop_reduce_idem cs = reduce cs === (reduce . unRP . reduce) cs
+newtype CoefficientsQC = CoefficientsQC Coefficients
+                       deriving (Show, Eq)
+
+sometimesZero :: (Num a, Arbitrary a) => Gen a
+sometimesZero = frequency [
+  (1, return 0),
+  (5, arbitrary)
+  ]
+
+instance Arbitrary CoefficientsQC where
+  arbitrary = CoefficientsQC <$> listOf sometimesZero
+
+prop_reduce_idem :: CoefficientsQC -> Property
+prop_reduce_idem (CoefficientsQC cs) = reduce cs === (reduce . unRP . reduce) cs
   where unRP (RP rp) = rp
 
-prop_reduce_reducedPoly :: Coefficients -> Property
-prop_reduce_reducedPoly cs = not (null rp) ==> last rp /= 0
+prop_reduce_reducedPoly :: CoefficientsQC -> Property
+prop_reduce_reducedPoly (CoefficientsQC cs) = not (null rp) ==> last rp /= 0
   where (RP rp) = reduce cs
 
 instance Arbitrary ReducedPoly where
-  arbitrary = RP <$> liftM2 replaceLast (getNonZero <$> arbitrary) arbitrary
+  arbitrary = do
+    CoefficientsQC cs <- arbitrary
+    NonZero last <- arbitrary
+    return $ RP (replaceLast last cs)
     where replaceLast :: a -> [a] -> [a]
           replaceLast _ [] = []
           replaceLast x [_] = [x]
