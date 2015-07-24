@@ -14,11 +14,11 @@ isReal = (== 0) . imagPart
 isImag :: Complex Double -> Bool
 isImag = (== 0) . realPart
 
-prop_sqared_complex_sqrt_is_real :: Double -> Property
-prop_sqared_complex_sqrt_is_real x = x /= 0 ==> isReal ((mySqrt x)^2)
+prop_sqared_complex_sqrt_is_real :: NonZero Double -> Bool
+prop_sqared_complex_sqrt_is_real (NonZero x) = isReal ((mySqrt x)^2)
 
-prop_sqared_complex_sqrt_signum :: Double -> Property
-prop_sqared_complex_sqrt_signum x = x /= 0 ==> signum x == (realPart $ signum $ (mySqrt x)^2)
+prop_sqared_complex_sqrt_signum :: NonZero Double -> Property
+prop_sqared_complex_sqrt_signum (NonZero x) = signum x === (realPart $ signum $ (mySqrt x)^2)
 
-prop_complex_sqrt_either_real_or_imag :: Double -> Property
-prop_complex_sqrt_either_real_or_imag x = x /= 0 ==> isReal (mySqrt x) /= isImag (mySqrt x)
+prop_complex_sqrt_either_real_or_imag :: NonZero Double -> Bool
+prop_complex_sqrt_either_real_or_imag (NonZero x) = isReal (mySqrt x) /= isImag (mySqrt x)
