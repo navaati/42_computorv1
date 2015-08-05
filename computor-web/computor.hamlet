@@ -1,0 +1,18 @@
+^{formWidget}
+<div .row>
+  <div .col-md-6>
+    <div #messages .panel .panel-info>
+      <h2 .panel-heading .panel-title>Messages
+      <div .panel-body>
+        $forall message <- messages
+          <p>#{message}
+  <div .col-md-6>
+    $case res
+      $of Right solution
+        <div #solution .panel .panel-success>
+          <h2 .panel-heading .panel-title>Solution
+          <div .panel-body>#{solution}
+      $of Left err
+        <div #error .panel .panel-danger>
+          <h2 .panel-heading .panel-title>Error
+          <p .panel-body>#{displayError err}
