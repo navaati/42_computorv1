@@ -7,10 +7,10 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 
 import Yesod
-import Yesod.Form.Bootstrap3
 import Text.Hamlet
 import Text.Blaze
 import Data.Text hiding (map, zip)
+import Data.Maybe
 import Data.Complex
 
 import Computor
@@ -37,20 +37,19 @@ getBootstrapR = sendFile typeCss "computor-web/bootstrap.min.css"
 instance RenderMessage ComputorWeb FormMessage where
   renderMessage _ _ = defaultFormMessage
 
-equationForm :: Html -> MForm Handler (FormResult Text, Widget)
-equationForm = renderBootstrap3 BootstrapBasicForm $ areq textField (bfs ("Equation: " :: Text)) Nothing
-
-formTemplate ((result, formWidget), enctype) = (result, [whamlet|
-    <div .panel.panel-default>
-      <form .panel-body method=get action=@{ComputorR} enctype=#{enctype}>
-        ^{formWidget}
-        <button>Résoudre
-  |])
+form :: Maybe Text -> Widget
+form value = [whamlet|
+  <div .panel.panel-default>
+    <form .panel-body method=get action=@{ComputorR}>
+      <div .input-group>
+        <input .form-control type=text name=input :isJust value:value=#{fromJust value}>
+        <span .input-group-btn>
+          <button .btn.btn-default>Résoudre
+  |]
 
 getHomeR :: Handler Html
 getHomeR = do
-  (_, formWidget) <- formTemplate <$> runFormGet equationForm
-  defaultLayout formWidget
+  defaultLayout $ form Nothing
 
 tableHelper :: ToMarkup a => [(Markup, a)] -> Markup
 tableHelper pairs = [shamlet|
@@ -91,11 +90,8 @@ instance ToMarkup Solution where
 
 getComputorR :: Handler Html
 getComputorR = do
-  (formResult, formWidget) <- formTemplate <$> runFormGet equationForm
-  let input = case formResult of
-        FormSuccess equation -> [unpack equation]
-        _ -> []
-  let (res, messages) = runComputorM $ computor input
+  input <- runInputGet $ ireq textField "input"
+  let (res, messages) = runComputorM $ computor [unpack input]
   defaultLayout $(whamletFile "computor-web/computor.hamlet")
 
 main :: IO ()

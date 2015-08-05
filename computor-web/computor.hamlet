@@ -1,4 +1,4 @@
-^{formWidget}
+^{form $ Just input}
 <div .row>
   <div .col-md-6>
     <div #messages .panel .panel-info>
