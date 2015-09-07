@@ -7,7 +7,7 @@ import Computor.Displaying
 main :: IO ()
 main = do
   args <- getArgs
-  let (res, messages) = runComputorM $ computor args
+  let (res, messages) = runComputorM $ computor (unwords args)
   putStr $ unlines messages
   case res of
    (Right solution) -> putStrLn $ displaySolution solution

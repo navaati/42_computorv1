@@ -20,13 +20,12 @@ zipWithDefault op def (x:xs) [] = (x `op` def):zipWithDefault op def xs []
 zipWithDefault op def [] (y:ys) = (def `op` y):zipWithDefault op def [] ys
 zipWithDefault op def (x:xs) (y:ys) = (x `op` y):zipWithDefault op def xs ys
 
-computor :: [String] -> ComputorM Solution
-computor [arg] = do
-  (lhs, rhs) <- withExceptT ParseError . ExceptT . return $ runEquationParser arg
+computor :: String -> ComputorM Solution
+computor input = do
+  (lhs, rhs) <- withExceptT ParseError . ExceptT . return $ runEquationParser input
   let rp = reduce $ zipWithDefault (-) 0 lhs rhs
   tell [printf "Reduced form: %s = 0" $ displayReducedPoly rp]
   let deg = getDegree rp
   tell [printf "Polynomial degree: %s" $ displayDegree deg]
   poly <- reducedToPoly rp
   solve poly
-computor _ = throwError WrongNumberOfArgument

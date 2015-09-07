@@ -101,7 +101,7 @@ instance ToMarkup Solution where
 getComputorR :: Handler Html
 getComputorR = do
   input <- runInputGet $ ireq textField "input"
-  let (res, messages) = runComputorM $ computor [unpack input]
+  let (res, messages) = runComputorM $ computor (unpack input)
   defaultLayout $(whamletFile "computor-web/computor.hamlet")
 
 main :: IO ()

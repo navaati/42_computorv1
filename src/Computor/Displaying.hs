@@ -28,7 +28,6 @@ displaySolution (OneRoot x) = printf "The solution is: %f" x
 displaySolution AllReals = "This equation holds true whatever X is"
 
 displayError :: ComputorError -> String
-displayError WrongNumberOfArgument = "Only one argument accepted"
 displayError (ParseError err) = show err
 displayError DegreeMoreThan2 = "This program can only solve polynoms of degree 2 or less"
 displayError NoSolution = "This equation holds false whatever X is"

@@ -4,8 +4,7 @@ module Computor.Error (
 
 import Text.Parsec (ParseError)
 
-data ComputorError = WrongNumberOfArgument
-                   | ParseError ParseError
+data ComputorError = ParseError ParseError
                    | DegreeMoreThan2
                    | NoSolution
                    deriving (Show, Eq)
