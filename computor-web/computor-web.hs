@@ -49,7 +49,17 @@ form value = [whamlet|
 
 getHomeR :: Handler Html
 getHomeR = do
-  defaultLayout $ form Nothing
+  let eqs = [
+        "4 * X^0 = 0 * X^0 + 0 * X^1 + 1 * X^2",
+        "1 * X^0 = 2 * X^0",
+        "0 * X^0 + 1 * X^1 = 0 * X^0 + 1 * X^1"]
+  defaultLayout [whamlet|
+  ^{form Nothing}
+  <ul>
+    $forall eq <- eqs
+      <li>
+        <a href=@?{(ComputorR,[("input", eq)])}>#{eq}
+  |]
 
 tableHelper :: ToMarkup a => [(Markup, a)] -> Markup
 tableHelper pairs = [shamlet|
