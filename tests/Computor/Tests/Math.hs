@@ -9,7 +9,6 @@ import Text.Printf
 
 import Computor.Math
 import Computor.Error
-import Computor.Displaying
 
 prop_real_sqrt_prec :: Double -> Property
 prop_real_sqrt_prec x = x > 0 ==> (myRealSqrt x)^2 - x < 0.00000000001

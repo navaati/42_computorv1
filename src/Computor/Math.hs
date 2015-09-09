@@ -4,6 +4,7 @@ module Computor.Math where
 
 import Data.Maybe
 import Data.Complex
+import Text.Printf
 import Data.List
 import Control.Monad.Except
 
@@ -55,6 +56,11 @@ myRealSqrt a = fst . fromJust $ find (\(x_k, x_kp1) -> absError x_kp1 >= absErro
 mySqrt :: Double -> Complex Double
 mySqrt x | x < 0 = (0 :+ myRealSqrt (-x))
          | otherwise = myRealSqrt x :+ 0
+
+displayComplex :: Complex Double -> String
+displayComplex (a :+ 0) = show a
+displayComplex (0 :+ b) = printf "%fi" b
+displayComplex (a :+ b) = printf "%f + %fi" a b
 
 data Solution = TwoRoots (Complex Double) (Complex Double) | DoubleRoot Double | OneRoot Double | AllReals
               deriving (Show, Eq)

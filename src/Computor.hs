@@ -7,11 +7,14 @@ import Control.Monad.Writer
 import Computor.Error
 import Computor.Parsing
 import Computor.Math
-import Computor.Displaying
 
-type ComputorM a = ExceptT ComputorError (Writer [String]) a
+type ComputorM a = ExceptT ComputorError (Writer [Message]) a
 
-runComputorM :: ComputorM a -> (Either ComputorError a, [String])
+data Message = ReducedForm ReducedPoly
+             | PolynomialDegree Degree
+               deriving (Show)
+
+runComputorM :: ComputorM a -> (Either ComputorError a, [Message])
 runComputorM = runWriter . runExceptT
 
 zipWithDefault :: (a -> a -> b) -> a -> [a] -> [a] -> [b]
@@ -24,8 +27,8 @@ computor :: String -> ComputorM Solution
 computor input = do
   (lhs, rhs) <- withExceptT ParseError . ExceptT . return $ runEquationParser input
   let rp = reduce $ zipWithDefault (-) 0 lhs rhs
-  tell [printf "Reduced form: %s = 0" $ displayReducedPoly rp]
+  tell [ReducedForm rp]
   let deg = getDegree rp
-  tell [printf "Polynomial degree: %s" $ displayDegree deg]
+  tell [PolynomialDegree deg]
   poly <- reducedToPoly rp
   solve poly

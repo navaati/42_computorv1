@@ -9,14 +9,14 @@
 import Yesod
 import Text.Hamlet
 import Text.Blaze
-import Data.Text hiding (map, zip)
+import Data.Text hiding (map, zipWith, intersperse)
 import Data.Maybe
 import Data.Complex
+import Data.List
 
 import Computor
 import Computor.Math
 import Computor.Error
-import Computor.Displaying
 
 data ComputorWeb = ComputorWeb
 
@@ -96,6 +96,25 @@ instance ToMarkup Solution where
   |]
   toMarkup AllReals = [shamlet|
   <p>The equation holds true for all numbers
+  |]
+
+instance ToMarkup Message where
+  toMarkup (ReducedForm rp) = [shamlet|
+  Reduced form: ^{rp_html} = 0
+  |]
+    where rp_html = case rp of
+            RP [] -> "0"
+            RP rp' -> sequence_ $ intersperse " + " $ zipWith3 monome rp' (cycle colors) [0..]
+          monome :: Double -> Text -> Int -> Html
+          monome coeff color deg = [shamlet|<span style="color: #{color}">#{show coeff} * X^#{deg}|]
+          colors = ["#86C6EF", "#F16F55", "#7D71B2", "#9CCE82", "#D67BB0"]
+  toMarkup (PolynomialDegree d) = [shamlet|
+  Polynomial degree: #
+  $case d
+    $of Degree deg
+      #{show deg}
+    $of MinusInf
+      -∞
   |]
 
 getComputorR :: Handler Html
