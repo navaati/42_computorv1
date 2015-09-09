@@ -42,4 +42,4 @@ equationParser = do
   return (lhs, rhs)
 
 runEquationParser :: String -> Either ParseError Equation
-runEquationParser = runParser equationParser 0 "command line"
+runEquationParser input = runParser equationParser 0 input input
