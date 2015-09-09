@@ -4,8 +4,9 @@
     <div #messages .panel .panel-info>
       <h2 .panel-heading .panel-title>Messages
       <div .panel-body>
-        $forall message <- messages
-          <p>#{message}
+        <ul>
+          $forall message <- messages
+            <li>#{message}
   <div .col-md-6>
     $case res
       $of Right solution
